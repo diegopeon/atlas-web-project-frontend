@@ -1,11 +1,8 @@
-
 // User types
 export interface User {
   id: string;
   login: string;
   role: "ADMINISTRADOR" | "PROFESSOR";
-  escola?: string;
-  nome?: string;
 }
 
 export interface AuthResponse {
@@ -20,15 +17,12 @@ export interface LoginCredentials {
 export interface RegisterProfessorData {
   login: string;
   password: string;
-  escola: string;
-  nome: string;
   role: "PROFESSOR";
 }
 
 export interface RegisterAdminData {
   login: string;
   password: string;
-  nome: string;
   role: "ADMINISTRADOR";
 }
 
