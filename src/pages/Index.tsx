@@ -10,25 +10,30 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!loading) {
-      // Para testes, permitimos acesso direto aos dashboards
-      if (!isAuthenticated) {
-        // Caso queiramos testar, podemos comentar a linha abaixo
-        navigate("/login");
-      } else if (user?.role === "ADMINISTRADOR") {
-        navigate("/dashboard-admin");
-      } else if (user?.role === "PROFESSOR") {
-        navigate("/dashboard-professor");
-      } else if (user) {
-        // Usuário autenticado mas com role inválida
-        toast({
-          variant: "destructive",
-          title: "Erro de acesso",
-          description: "Seu perfil de usuário não tem permissão para acessar o sistema.",
-        });
-        navigate("/login");
+    // Esperamos um pouco para garantir que o estado de autenticação seja carregado
+    const timer = setTimeout(() => {
+      if (!loading) {
+        console.log("Auth state:", { isAuthenticated, user });
+        
+        if (!isAuthenticated) {
+          navigate("/login");
+        } else if (user?.role === "ADMINISTRADOR") {
+          navigate("/dashboard-admin");
+        } else if (user?.role === "PROFESSOR") {
+          navigate("/dashboard-professor");
+        } else if (user) {
+          // Usuário autenticado mas com role inválida
+          toast({
+            variant: "destructive",
+            title: "Erro de acesso",
+            description: "Seu perfil de usuário não tem permissão para acessar o sistema.",
+          });
+          navigate("/login");
+        }
       }
-    }
+    }, 500); // Pequeno delay para garantir que o estado esteja atualizado
+    
+    return () => clearTimeout(timer);
   }, [isAuthenticated, user, loading, navigate, toast]);
 
   // Enquanto carrega, exibe um spinner

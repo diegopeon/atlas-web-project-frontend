@@ -35,7 +35,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
@@ -54,13 +54,22 @@ const Login: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      // Remove the navigate parameter since it should be handled in the login function
       await login(data.login, data.password);
 
       toast({
         title: "Login realizado com sucesso",
         description: "Bem-vindo ao sistema Atlas!",
       });
+      
+      // Redirecionamento manual após login bem-sucedido
+      if (user?.role === "ADMINISTRADOR") {
+        navigate("/dashboard-admin");
+      } else if (user?.role === "PROFESSOR") {
+        navigate("/dashboard-professor");
+      } else {
+        // Se não tiver role definido, vai para a página inicial que fará o redirecionamento
+        navigate("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       setError("Credenciais inválidas. Por favor, tente novamente.");

@@ -1,3 +1,4 @@
+
 // src/context/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types";
@@ -18,7 +19,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Função para carregar o usuário a partir do token
+  const loadUser = () => {
     const token = tokenUtils.getToken();
     if (token && tokenUtils.isTokenValid()) {
       const decoded = tokenUtils.decodeToken(token);
@@ -28,11 +30,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           login: decoded.login,
           role: decoded.role,
         });
+        return true;
       }
     } else {
       tokenUtils.removeToken();
       setUser(null);
     }
+    return false;
+  };
+
+  useEffect(() => {
+    loadUser();
     setLoading(false);
   }, []);
 
@@ -41,14 +49,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await AuthService.login({ login, password });
       tokenUtils.setToken(response.token);
-      const decoded = tokenUtils.decodeToken(response.token);
-      if (decoded) {
-        setUser({
-          id: decoded.sub,
-          login: decoded.login,
-          role: decoded.role,
-        });
-      }
+      // Carregar usuário após login bem-sucedido
+      loadUser();
     } catch (error) {
       tokenUtils.removeToken();
       setUser(null);
