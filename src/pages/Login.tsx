@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
@@ -53,7 +54,8 @@ const Login: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      await login(data.login, data.password, navigate);
+      // Remove the navigate parameter since it should be handled in the login function
+      await login(data.login, data.password);
 
       toast({
         title: "Login realizado com sucesso",
