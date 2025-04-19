@@ -1,4 +1,3 @@
-
 // User types
 export interface User {
   id: string;
@@ -36,7 +35,8 @@ export interface Project {
   escopo: string;
   publicoAlvo: string;
   status: ProjectStatus;
-  professorId: string;
+  professorId: string; // Mantido para facilitar uso no frontend
+  professor?: { id: string; login?: string }; // Adicionado para compatibilidade com backend
 }
 
 // Tipo usado apenas para envio ao backend
@@ -47,7 +47,7 @@ export interface ProjectPayload {
   escopo: string;
   "publico-alvo": string;
   status: ProjectStatus;
-  professorId: number; // tipo compatível com backend
+  professor: { id: number }; // Alterado para objeto professor com id
 }
 
 export type ProjectStatus =

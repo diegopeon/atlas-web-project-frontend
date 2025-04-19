@@ -1,3 +1,4 @@
+
 import api from "./api";
 import { Project } from "@/types";
 
@@ -9,7 +10,7 @@ export type ProjectPayload = {
   escopo: string;
   "publico-alvo": string;
   status: string;
-  professorId: number;
+  professor: { id: number }; // Alterado de professorId para professor com objeto contendo id
 };
 
 const ProjectService = {
@@ -29,7 +30,16 @@ const ProjectService = {
   },
 
   async updateProject(id: string, project: Partial<Project>): Promise<Project> {
-    const response = await api.put<Project>(`/project/${id}`, project);
+    // Adaptar o projeto para o formato esperado pelo backend se necessário
+    const adaptedProject = { ...project };
+    
+    // Se professorId estiver presente, converta para o formato professor: { id: number }
+    if (project.professorId) {
+      (adaptedProject as any).professor = { id: Number(project.professorId) };
+      delete (adaptedProject as any).professorId;
+    }
+    
+    const response = await api.put<Project>(`/project/${id}`, adaptedProject);
     return response.data;
   },
 

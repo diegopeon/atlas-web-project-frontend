@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -80,6 +81,7 @@ const SolicitarProjeto: React.FC = () => {
         return;
       }
 
+      // Modificando a estrutura do payload para enviar professor como objeto
       const payload: ProjectPayload = {
         name: data.nome,
         objetivo: data.objetivo,
@@ -87,7 +89,7 @@ const SolicitarProjeto: React.FC = () => {
         escopo: data.escopo,
         "publico-alvo": data.publicoAlvo,
         status: "AGUARDANDO_ANALISE_PRELIMINAR",
-        professorId: Number(user.id),
+        professor: { id: Number(user.id) }, // Alterado de professorId para professor: { id: number }
       };
 
       await ProjectService.createProject(payload);

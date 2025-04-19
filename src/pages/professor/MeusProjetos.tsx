@@ -41,10 +41,14 @@ const MeusProjetos: React.FC = () => {
       setLoading(true);
       const allProjects = await ProjectService.getAllProjects();
       
-      // Filter projects for current professor
+      // Filter projects for current professor using professor.id if available
+      // or fallback to professorId
       if (user?.id) {
         const userProjects = allProjects.filter(
-          (project) => project.professorId === user.id
+          (project) => {
+            const projectProfessorId = project.professor?.id || project.professorId;
+            return projectProfessorId === user.id;
+          }
         );
         setProjects(userProjects);
       }
