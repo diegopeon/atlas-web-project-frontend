@@ -1,13 +1,3 @@
-
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRoles?: Array<"ADMINISTRADOR" | "PROFESSOR">;
-}
-
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
@@ -15,29 +5,33 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
+  console.log("🟡 ProtectedRoute:: loading:", loading);
+  console.log("🟡 ProtectedRoute:: isAuthenticated:", isAuthenticated);
+  console.log("🟡 ProtectedRoute:: user:", user);
+  console.log("🟡 ProtectedRoute:: allowedRoles:", allowedRoles);
+
   if (loading) {
-    // Show loading indicator while checking authentication
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="text-lg text-blue-600">Carregando autenticação...</div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    // Redirect to login page if not authenticated
+    console.log("🔴 Usuário não autenticado");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If roles are specified, check if user has appropriate role
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    // Redirect to appropriate dashboard based on role
-    if (user.role === "ADMINISTRADOR") {
-      return <Navigate to="/dashboard-admin" replace />;
-    } else {
-      return <Navigate to="/dashboard-professor" replace />;
-    }
+    console.log("🔴 Usuário autenticado, mas com role inválida:", user.role);
+    return user.role === "ADMINISTRADOR" ? (
+      <Navigate to="/dashboard-admin" replace />
+    ) : (
+      <Navigate to="/dashboard-professor" replace />
+    );
   }
 
+  console.log("🟢 Autorizado, renderizando children.");
   return <>{children}</>;
 };
