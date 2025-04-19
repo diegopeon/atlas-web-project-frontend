@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -34,7 +34,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const { login, user, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
@@ -48,34 +48,13 @@ const Login: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      redirectBasedOnRole(user.role);
-    }
-  }, [isAuthenticated, user, navigate]);
-
-  const redirectBasedOnRole = (role: string) => {
-    if (role === "ADMINISTRADOR") {
-      navigate("/dashboard-admin");
-    } else if (role === "PROFESSOR") {
-      navigate("/dashboard-professor");
-    } else {
-      setError("Perfil de usuário não reconhecido. Entre em contato com o administrador.");
-      toast({
-        variant: "destructive",
-        title: "Erro de acesso",
-        description: "Tipo de usuário não autorizado.",
-      });
-    }
-  };
-
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      await login(data.login, data.password);
-      
+
+      await login(data.login, data.password, navigate);
+
       toast({
         title: "Login realizado com sucesso",
         description: "Bem-vindo ao sistema Atlas!",

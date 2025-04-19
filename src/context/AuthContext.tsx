@@ -1,13 +1,13 @@
-
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types";
 import AuthService from "@/services/auth.service";
 import { tokenUtils } from "@/utils/tokenUtils";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (login: string, password: string) => Promise<void>;
+  login: (login: string, password: string, navigate: any) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -32,7 +32,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verifica o token ao iniciar
     const token = tokenUtils.getToken();
     if (token && tokenUtils.isTokenValid()) {
       const decoded = tokenUtils.decodeToken(token);
@@ -44,37 +43,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
       }
     } else {
-      tokenUtils.removeToken(); // Remove token se inválido
+      tokenUtils.removeToken();
       setUser(null);
     }
     setLoading(false);
   }, []);
 
-  const login = async (login: string, password: string) => {
+  const login = async (login: string, password: string, navigate: any) => {
     try {
       setLoading(true);
       const response = await AuthService.login({ login, password });
-      
-      // Armazena o token
+
       tokenUtils.setToken(response.token);
-      
-      // Decodifica e configura o usuário
       const decoded = tokenUtils.decodeToken(response.token);
       if (decoded) {
-        setUser({
+        const newUser = {
           id: decoded.sub,
           login: decoded.login,
           role: decoded.role,
-        });
+        };
+        setUser(newUser);
+
+        // Redirecionar com base na role
+        if (newUser.role === "ADMINISTRADOR") {
+          navigate("/dashboard-admin");
+        } else {
+          navigate("/dashboard-professor");
+        }
       } else {
-        // Token inválido ou sem as informações necessárias
         throw new Error("Token inválido ou sem as informações necessárias");
       }
-      
+
       return Promise.resolve();
     } catch (error) {
       console.error("Login error:", error);
-      // Certifique-se de que o usuário seja nulo se o login falhar
       setUser(null);
       tokenUtils.removeToken();
       return Promise.reject(error);
