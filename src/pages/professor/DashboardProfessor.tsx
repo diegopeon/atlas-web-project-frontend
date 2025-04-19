@@ -72,6 +72,10 @@ const DashboardProfessor: React.FC = () => {
     .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime())
     .slice(0, 5);
 
+  console.log("Current user in professor dashboard:", user);
+  console.log("Project count:", projects.length);
+  console.log("Status counts:", statusCounts);
+
   return (
     <ProfessorLayout>
       <PageTitle

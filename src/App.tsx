@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
 import CadastroProfessor from "./pages/CadastroProfessor";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 // Professor Pages
 import DashboardProfessor from "./pages/professor/DashboardProfessor";
@@ -55,7 +56,7 @@ const App = () => (
             <Route path="/cadastro-professor" element={<CadastroProfessor />} />
             
             {/* Redirect root to appropriate dashboard based on role */}
-            <Route path="/" element={<AuthRedirect />} />
+            <Route path="/" element={<Index />} />
             
             {/* Professor Routes */}
             <Route
