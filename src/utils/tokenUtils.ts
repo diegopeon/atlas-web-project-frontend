@@ -34,8 +34,16 @@ export const tokenUtils = {
     try {
       const decoded = jwtDecode<JwtPayload>(token);
       const currentTime = Date.now() / 1000;
+      
+      // Verifica se o token possui a informação de 'role' no formato esperado
+      if (!decoded.role) {
+        console.error("Token não possui informação de 'role'");
+        return false;
+      }
+      
       return decoded.exp > currentTime;
-    } catch {
+    } catch (error) {
+      console.error("Erro ao validar token:", error);
       return false;
     }
   },
@@ -43,8 +51,16 @@ export const tokenUtils = {
   // Decodifica o token e retorna o payload
   decodeToken(token: string): JwtPayload | null {
     try {
-      return jwtDecode<JwtPayload>(token);
-    } catch {
+      const decoded = jwtDecode<JwtPayload>(token);
+      
+      // Se a role vier com prefixo ROLE_, removemos
+      if (decoded.role && typeof decoded.role === 'string' && decoded.role.startsWith('ROLE_')) {
+        decoded.role = decoded.role.replace('ROLE_', '') as "ADMINISTRADOR" | "PROFESSOR";
+      }
+      
+      return decoded;
+    } catch (error) {
+      console.error("Erro ao decodificar token:", error);
       return null;
     }
   }

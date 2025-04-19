@@ -13,16 +13,20 @@ const Index = () => {
     // Esperamos um pouco para garantir que o estado de autenticação seja carregado
     const timer = setTimeout(() => {
       if (!loading) {
-        console.log("Auth state:", { isAuthenticated, user });
+        console.log("Index - Auth state:", { isAuthenticated, user });
         
         if (!isAuthenticated) {
+          console.log("Index - Não autenticado, redirecionando para /login");
           navigate("/login");
         } else if (user?.role === "ADMINISTRADOR") {
+          console.log("Index - Administrador, redirecionando para /dashboard-admin");
           navigate("/dashboard-admin");
         } else if (user?.role === "PROFESSOR") {
+          console.log("Index - Professor, redirecionando para /dashboard-professor");
           navigate("/dashboard-professor");
         } else if (user) {
           // Usuário autenticado mas com role inválida
+          console.log("Index - Role inválida:", user.role);
           toast({
             variant: "destructive",
             title: "Erro de acesso",

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -35,11 +35,12 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const { login, user } = useAuth();
+  const { login, user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -49,30 +50,52 @@ const Login: React.FC = () => {
     },
   });
 
+  // Este effect é responsável pelo redirecionamento após login bem-sucedido
+  useEffect(() => {
+    console.log("Login useEffect - Auth state:", { isAuthenticated, user, loading, loginSuccess });
+    
+    // Só tentamos redirecionar se o login foi bem-sucedido e não estamos mais carregando
+    if (loginSuccess && !loading) {
+      if (isAuthenticated) {
+        console.log("Redirecionando usuário autenticado:", user?.role);
+        
+        if (user?.role === "ADMINISTRADOR") {
+          navigate("/dashboard-admin");
+        } else if (user?.role === "PROFESSOR") {
+          navigate("/dashboard-professor");
+        } else {
+          console.log("Role não reconhecida, redirecionando para '/'");
+          navigate("/");
+        }
+      } else {
+        console.log("Login bem-sucedido mas usuário não está autenticado");
+        setError("Erro de autenticação. Por favor, tente novamente.");
+        setLoginSuccess(false);
+      }
+    }
+  }, [isAuthenticated, user, loading, loginSuccess, navigate]);
+
   const onSubmit = async (data: LoginFormData) => {
     try {
+      console.log("Tentando login com:", data.login);
       setIsLoading(true);
       setError(null);
+      setLoginSuccess(false);
 
       await login(data.login, data.password);
+      console.log("Login bem-sucedido no componente Login");
 
       toast({
         title: "Login realizado com sucesso",
         description: "Bem-vindo ao sistema Atlas!",
       });
       
-      // Redirecionamento manual após login bem-sucedido
-      if (user?.role === "ADMINISTRADOR") {
-        navigate("/dashboard-admin");
-      } else if (user?.role === "PROFESSOR") {
-        navigate("/dashboard-professor");
-      } else {
-        // Se não tiver role definido, vai para a página inicial que fará o redirecionamento
-        navigate("/");
-      }
+      // Marcamos que o login foi bem-sucedido para acionar o useEffect de redirecionamento
+      setLoginSuccess(true);
     } catch (err) {
       console.error("Login error:", err);
       setError("Credenciais inválidas. Por favor, tente novamente.");
+      setLoginSuccess(false);
     } finally {
       setIsLoading(false);
     }
