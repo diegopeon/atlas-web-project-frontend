@@ -2,15 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useAuth } from "@/hooks/useAuth";
 
 // Public Pages
 import Login from "@/pages/Login";
 import CadastroProfessor from "@/pages/CadastroProfessor";
 import NotFound from "@/pages/NotFound";
+import AuthRedirectPage from "@/pages/AuthRedirectPage";
 
 // Professor Pages
 import DashboardProfessor from "@/pages/professor/DashboardProfessor";
@@ -26,26 +26,6 @@ import Grupos from "@/pages/admin/Grupos";
 
 const queryClient = new QueryClient();
 
-// Componente auxiliar para redirecionamento automático com base no papel do usuário
-const AuthRedirect = () => {
-  const { user, isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user?.role === "ADMINISTRADOR") {
-    return <Navigate to="/dashboard-admin" replace />;
-  }
-
-  if (user?.role === "PROFESSOR") {
-    return <Navigate to="/dashboard-professor" replace />;
-  }
-
-  // Se não for reconhecido, envia para login
-  return <Navigate to="/login" replace />;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -54,14 +34,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Rotas Públicas */}
+            {/* Rotas públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro-professor" element={<CadastroProfessor />} />
 
-            {/* Redirecionamento inteligente baseado no papel */}
-            <Route path="/" element={<AuthRedirect />} />
+            {/* Redirecionamento com base no role */}
+            <Route path="/" element={<AuthRedirectPage />} />
 
-            {/* Rotas de Professores */}
+            {/* Rotas do professor */}
             <Route
               path="/dashboard-professor"
               element={
@@ -87,7 +67,7 @@ const App = () => (
               }
             />
 
-            {/* Rotas de Administradores */}
+            {/* Rotas do admin */}
             <Route
               path="/dashboard-admin"
               element={
@@ -129,7 +109,7 @@ const App = () => (
               }
             />
 
-            {/* Página 404 */}
+            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
