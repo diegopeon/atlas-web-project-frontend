@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProfessorLayout from "@/components/layout/ProfessorLayout";
@@ -15,10 +16,11 @@ import {
 } from "@/components/ui/table";
 import { Project } from "@/types";
 import ProjectService from "@/services/project.service";
-import { FilePlus, FileText } from "lucide-react";
+import { FilePlus, FileText, Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const DashboardProfessor: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -158,6 +160,29 @@ const DashboardProfessor: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Orientações da Fábrica de Software */}
+      <Card className="mb-6">
+        <CardHeader className="bg-blue-50 border-b border-blue-100">
+          <div className="flex items-center">
+            <Info className="h-5 w-5 text-blue-600 mr-2" />
+            <CardTitle className="text-md font-medium text-blue-700">Orientações da Fábrica de Software</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertTitle>Como funciona o processo de solicitação:</AlertTitle>
+            <AlertDescription>
+              <ol className="list-decimal ml-4 mt-2 space-y-1">
+                <li>Preencha o formulário de solicitação com todos os detalhes do projeto</li>
+                <li>Aguarde a análise preliminar da equipe (até 3 dias úteis)</li>
+                <li>Após aprovação, seu projeto entrará em desenvolvimento</li>
+                <li>Você receberá atualizações sobre o andamento do projeto</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Projetos Recentes</h2>
