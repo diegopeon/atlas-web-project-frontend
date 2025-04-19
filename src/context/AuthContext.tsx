@@ -1,31 +1,18 @@
+// src/context/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types";
 import AuthService from "@/services/auth.service";
 import { tokenUtils } from "@/utils/tokenUtils";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (login: string, password: string, navigate: any) => Promise<void>;
+  login: (login: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
-interface JwtPayload {
-  sub: string;
-  role: "ADMINISTRADOR" | "PROFESSOR";
-  exp: number;
-  login: string;
-}
-
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  login: async () => {},
-  logout: () => {},
-  isAuthenticated: false,
-});
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -49,37 +36,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(false);
   }, []);
 
-  const login = async (login: string, password: string, navigate: any) => {
+  const login = async (login: string, password: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await AuthService.login({ login, password });
-
       tokenUtils.setToken(response.token);
       const decoded = tokenUtils.decodeToken(response.token);
       if (decoded) {
-        const newUser = {
+        setUser({
           id: decoded.sub,
           login: decoded.login,
           role: decoded.role,
-        };
-        setUser(newUser);
-
-        // Redirecionar com base na role
-        if (newUser.role === "ADMINISTRADOR") {
-          navigate("/dashboard-admin");
-        } else {
-          navigate("/dashboard-professor");
-        }
-      } else {
-        throw new Error("Token inválido ou sem as informações necessárias");
+        });
       }
-
-      return Promise.resolve();
     } catch (error) {
-      console.error("Login error:", error);
-      setUser(null);
       tokenUtils.removeToken();
-      return Promise.reject(error);
+      setUser(null);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -90,13 +63,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
-  const value = {
-    user,
-    loading,
-    login,
-    logout,
-    isAuthenticated: !!user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        isAuthenticated: !!user,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
