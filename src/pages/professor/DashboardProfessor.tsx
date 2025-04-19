@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProfessorLayout from "@/components/layout/ProfessorLayout";
@@ -24,43 +23,52 @@ import { useToast } from "@/hooks/use-toast";
 const DashboardProfessor: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Dashboard Mount - User:", user);
+    console.log("Is Authenticated:", isAuthenticated);
+
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const allProjects = await ProjectService.getAllProjects();
-        
-        // Filter projects for current professor
-        if (user?.id) {
-          const userProjects = allProjects.filter(
-            (project) => project.professorId === user.id
-          );
-          setProjects(userProjects);
-          
-          // For debugging
-          console.log("Current user ID:", user.id);
-          console.log("All projects:", allProjects);
-          console.log("Filtered projects:", userProjects);
-        } else {
-          console.log("User ID not available");
+        if (!user || !user.id) {
+          console.error("No user or user ID available");
+          setError("Usuário não identificado");
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
+
+        const allProjects = await ProjectService.getAllProjects();
+        console.log("All Projects Fetched:", allProjects);
+        
+        const userProjects = allProjects.filter(
+          (project) => project.professorId === user.id
+        );
+        
+        console.log("User Projects:", userProjects);
+        
+        setProjects(userProjects);
+      } catch (err) {
+        console.error("Erro ao buscar projetos:", err);
+        setError("Não foi possível carregar os projetos");
         toast({
-          title: "Erro ao carregar projetos",
-          description: "Não foi possível obter a lista de projetos.",
-          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível carregar os projetos",
+          variant: "destructive"
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProjects();
-  }, [user?.id, toast]);
+    if (isAuthenticated) {
+      fetchProjects();
+    } else {
+      console.log("Not authenticated, cannot fetch projects");
+    }
+  }, [user?.id, isAuthenticated, toast]);
 
   // Count projects by status
   const statusCounts = projects.reduce((acc, project) => {
@@ -72,9 +80,28 @@ const DashboardProfessor: React.FC = () => {
     .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime())
     .slice(0, 5);
 
-  console.log("Current user in professor dashboard:", user);
-  console.log("Project count:", projects.length);
-  console.log("Status counts:", statusCounts);
+  if (error) {
+    return (
+      <ProfessorLayout>
+        <div className="text-center text-red-500 p-6">
+          {error}
+          <Button onClick={() => window.location.reload()} className="ml-4">
+            Recarregar
+          </Button>
+        </div>
+      </ProfessorLayout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <ProfessorLayout>
+        <div className="flex justify-center items-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </ProfessorLayout>
+    );
+  }
 
   return (
     <ProfessorLayout>
