@@ -39,6 +39,17 @@ export interface Project {
   professorId: string;
 }
 
+// Tipo usado apenas para envio ao backend
+export interface ProjectPayload {
+  name: string;
+  objetivo: string;
+  data: string; // backend espera campo chamado "data"
+  escopo: string;
+  "publico-alvo": string;
+  status: ProjectStatus;
+  professorId: number; // tipo compatível com backend
+}
+
 export type ProjectStatus =
   | "AGUARDANDO_ANALISE_PRELIMINAR"
   | "EM_ANALISE"

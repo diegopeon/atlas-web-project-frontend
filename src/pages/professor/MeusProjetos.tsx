@@ -129,7 +129,7 @@ const MeusProjetos: React.FC = () => {
                   <StatusBadge status={project.status} />
                 </div>
                 <CardDescription>
-                  Início: {format(new Date(project.dataInicio), "dd/MM/yyyy")}
+                  Início:  {project.dataInicio ? format(new Date(project.dataInicio), "dd/MM/yyyy") : "Sem data"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">

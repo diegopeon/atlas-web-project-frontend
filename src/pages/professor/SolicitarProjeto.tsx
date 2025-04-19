@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -29,13 +28,12 @@ import { ptBR } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import type { ProjectPayload } from "@/services/project.service";
 
 const projectSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   objetivo: z.string().min(1, "Objetivo é obrigatório"),
-  dataInicio: z.date({
-    required_error: "Data de início é obrigatória",
-  }),
+  dataInicio: z.date({ required_error: "Data de início é obrigatória" }),
   escopo: z.string().min(1, "Escopo é obrigatório"),
   publicoAlvo: z.string().min(1, "Público-alvo é obrigatório"),
 });
@@ -72,7 +70,6 @@ const SolicitarProjeto: React.FC = () => {
     setSuccess(null);
 
     try {
-      // Check if project with this name already exists
       setIsCheckingName(true);
       const exists = await ProjectService.checkProjectNameExists(data.nome);
       setIsCheckingName(false);
@@ -83,16 +80,17 @@ const SolicitarProjeto: React.FC = () => {
         return;
       }
 
-      // Create project
-      await ProjectService.createProject({
-        nome: data.nome,
+      const payload: ProjectPayload = {
+        name: data.nome,
         objetivo: data.objetivo,
-        dataInicio: data.dataInicio.toISOString(), // Convert to ISO string
+        data: data.dataInicio.toISOString(),
         escopo: data.escopo,
-        publicoAlvo: data.publicoAlvo,
+        "publico-alvo": data.publicoAlvo,
         status: "AGUARDANDO_ANALISE_PRELIMINAR",
-        professorId: user.id,
-      });
+        professorId: Number(user.id),
+      };
+
+      await ProjectService.createProject(payload);
 
       setSuccess("Projeto solicitado com sucesso! Aguarde a análise preliminar.");
       toast({
@@ -100,13 +98,8 @@ const SolicitarProjeto: React.FC = () => {
         description: "Seu projeto foi enviado para análise.",
       });
 
-      // Reset form
       form.reset();
-
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate("/meus-projetos");
-      }, 2000);
+      setTimeout(() => navigate("/meus-projetos"), 2000);
     } catch (err) {
       console.error("Error submitting project:", err);
       setError("Erro ao solicitar projeto. Tente novamente mais tarde.");
@@ -142,6 +135,7 @@ const SolicitarProjeto: React.FC = () => {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Nome */}
               <FormField
                 control={form.control}
                 name="nome"
@@ -149,20 +143,15 @@ const SolicitarProjeto: React.FC = () => {
                   <FormItem>
                     <FormLabel>Nome do Projeto</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Digite o nome do projeto"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Input placeholder="Digite o nome do projeto" {...field} disabled={isLoading} />
                     </FormControl>
-                    <FormDescription>
-                      O nome deve ser único para identificar o projeto
-                    </FormDescription>
+                    <FormDescription>O nome deve ser único para identificar o projeto</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Objetivo */}
               <FormField
                 control={form.control}
                 name="objetivo"
@@ -170,18 +159,14 @@ const SolicitarProjeto: React.FC = () => {
                   <FormItem>
                     <FormLabel>Objetivo</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Descreva o objetivo do projeto"
-                        className="min-h-20"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Textarea placeholder="Descreva o objetivo do projeto" className="min-h-20" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Data de Início */}
               <FormField
                 control={form.control}
                 name="dataInicio"
@@ -192,20 +177,11 @@ const SolicitarProjeto: React.FC = () => {
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
+                            variant="outline"
+                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                             disabled={isLoading}
                           >
-                            {field.value ? (
-                              format(field.value, "dd 'de' MMMM 'de' yyyy", {
-                                locale: ptBR,
-                              })
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
+                            {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : <span>Selecione uma data</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -215,9 +191,7 @@ const SolicitarProjeto: React.FC = () => {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) =>
-                            date < new Date(new Date().setHours(0, 0, 0, 0))
-                          }
+                          disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
                           initialFocus
                         />
                       </PopoverContent>
@@ -227,6 +201,7 @@ const SolicitarProjeto: React.FC = () => {
                 )}
               />
 
+              {/* Escopo */}
               <FormField
                 control={form.control}
                 name="escopo"
@@ -234,18 +209,14 @@ const SolicitarProjeto: React.FC = () => {
                   <FormItem>
                     <FormLabel>Escopo</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Descreva o escopo do projeto"
-                        className="min-h-20"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Textarea placeholder="Descreva o escopo do projeto" className="min-h-20" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Público-alvo */}
               <FormField
                 control={form.control}
                 name="publicoAlvo"
@@ -253,18 +224,14 @@ const SolicitarProjeto: React.FC = () => {
                   <FormItem>
                     <FormLabel>Público-alvo</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Defina o público-alvo do projeto"
-                        className="min-h-20"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Textarea placeholder="Defina o público-alvo do projeto" className="min-h-20" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Botão */}
               <div className="flex justify-end">
                 <Button type="submit" disabled={isLoading || isCheckingName}>
                   {isLoading

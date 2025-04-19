@@ -347,7 +347,7 @@ const Projetos: React.FC = () => {
                       {professors[project.professorId] || project.professorId}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(project.dataInicio), "dd/MM/yyyy")}
+                       {project.dataInicio ? format(new Date(project.dataInicio), "dd/MM/yyyy") : "Sem data"}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={project.status} />
