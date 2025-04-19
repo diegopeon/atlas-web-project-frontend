@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types";
 import AuthService from "@/services/auth.service";
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } else {
       tokenUtils.removeToken(); // Remove token se inválido
+      setUser(null);
     }
     setLoading(false);
   }, []);
@@ -64,11 +66,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           login: decoded.login,
           role: decoded.role,
         });
+      } else {
+        // Token inválido ou sem as informações necessárias
+        throw new Error("Token inválido ou sem as informações necessárias");
       }
       
       return Promise.resolve();
     } catch (error) {
       console.error("Login error:", error);
+      // Certifique-se de que o usuário seja nulo se o login falhar
+      setUser(null);
+      tokenUtils.removeToken();
       return Promise.reject(error);
     } finally {
       setLoading(false);

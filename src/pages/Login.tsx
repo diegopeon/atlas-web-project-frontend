@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -35,7 +34,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +48,27 @@ const Login: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      redirectBasedOnRole(user.role);
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const redirectBasedOnRole = (role: string) => {
+    if (role === "ADMINISTRADOR") {
+      navigate("/dashboard-admin");
+    } else if (role === "PROFESSOR") {
+      navigate("/dashboard-professor");
+    } else {
+      setError("Perfil de usuário não reconhecido. Entre em contato com o administrador.");
+      toast({
+        variant: "destructive",
+        title: "Erro de acesso",
+        description: "Tipo de usuário não autorizado.",
+      });
+    }
+  };
+
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
@@ -56,32 +76,10 @@ const Login: React.FC = () => {
       
       await login(data.login, data.password);
       
-      // Decode JWT to get role from localStorage (we already have it from the login response)
-      const token = localStorage.getItem("token");
-      if (token) {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const jsonPayload = decodeURIComponent(
-          atob(base64)
-            .split("")
-            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-            .join("")
-        );
-        
-        const { role } = JSON.parse(jsonPayload);
-        
-        // Redirect based on role
-        if (role === "ADMINISTRADOR") {
-          navigate("/dashboard-admin");
-        } else {
-          navigate("/dashboard-professor");
-        }
-        
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema Atlas!",
-        });
-      }
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo ao sistema Atlas!",
+      });
     } catch (err) {
       console.error("Login error:", err);
       setError("Credenciais inválidas. Por favor, tente novamente.");
