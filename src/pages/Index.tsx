@@ -11,7 +11,9 @@ const Index = () => {
 
   useEffect(() => {
     if (!loading) {
+      // Para testes, permitimos acesso direto aos dashboards
       if (!isAuthenticated) {
+        // Caso queiramos testar, podemos comentar a linha abaixo
         navigate("/login");
       } else if (user?.role === "ADMINISTRADOR") {
         navigate("/dashboard-admin");
@@ -29,6 +31,7 @@ const Index = () => {
     }
   }, [isAuthenticated, user, loading, navigate, toast]);
 
+  // Enquanto carrega, exibe um spinner
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

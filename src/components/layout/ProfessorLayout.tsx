@@ -8,12 +8,10 @@ import {
   FilePlus,
   LogOut,
   Menu,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
 
 interface ProfessorLayoutProps {
   children: React.ReactNode;
@@ -82,7 +80,7 @@ const ProfessorLayout: React.FC<ProfessorLayoutProps> = ({ children }) => {
                 </AvatarFallback>
               </Avatar>
               <div className="ml-3">
-                <p className="text-sm font-medium">{user?.login}</p>
+                <p className="text-sm font-medium">{user?.login || "Professor"}</p>
                 <p className="text-xs text-gray-500">Professor</p>
               </div>
             </div>
@@ -141,7 +139,7 @@ const ProfessorLayout: React.FC<ProfessorLayoutProps> = ({ children }) => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
-                    <p className="text-sm font-medium">{user?.login}</p>
+                    <p className="text-sm font-medium">{user?.login || "Professor"}</p>
                     <p className="text-xs text-gray-500">Professor</p>
                   </div>
                 </div>

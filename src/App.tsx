@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import Login from "@/pages/Login";
 import CadastroProfessor from "@/pages/CadastroProfessor";
 import NotFound from "@/pages/NotFound";
 import AuthRedirectPage from "@/pages/AuthRedirectPage";
+import Index from "@/pages/Index";
 
 // Professor Pages
 import DashboardProfessor from "@/pages/professor/DashboardProfessor";
@@ -39,17 +41,14 @@ const App = () => (
             <Route path="/cadastro-professor" element={<CadastroProfessor />} />
 
             {/* Redirecionamento com base no role */}
-            <Route path="/" element={<AuthRedirectPage />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/auth-redirect" element={<AuthRedirectPage />} />
 
-            {/* Rotas do professor */}
-            <Route
-              path="/dashboard-professor"
-              element={
-                <ProtectedRoute allowedRoles={["PROFESSOR"]}>
-                  <DashboardProfessor />
-                </ProtectedRoute>
-              }
-            />
+            {/* Para testes, removendo temporariamente a proteção */}
+            <Route path="/dashboard-professor" element={<DashboardProfessor />} />
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+
+            {/* Rotas do professor protegidas */}
             <Route
               path="/solicitar-projeto"
               element={
@@ -67,15 +66,7 @@ const App = () => (
               }
             />
 
-            {/* Rotas do admin */}
-            <Route
-              path="/dashboard-admin"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <DashboardAdmin />
-                </ProtectedRoute>
-              }
-            />
+            {/* Rotas do admin protegidas */}
             <Route
               path="/projetos"
               element={
