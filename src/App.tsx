@@ -28,21 +28,6 @@ import Grupos from "./pages/admin/Grupos";
 
 const queryClient = new QueryClient();
 
-// Helper component to redirect based on auth status
-const AuthRedirect = () => {
-  const { user, isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user?.role === "ADMINISTRADOR") {
-    return <Navigate to="/dashboard-admin" replace />;
-  }
-
-  return <Navigate to="/dashboard-professor" replace />;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -54,77 +39,19 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro-professor" element={<CadastroProfessor />} />
-            
-            {/* Redirect root to appropriate dashboard based on role */}
             <Route path="/" element={<Index />} />
             
-            {/* Professor Routes */}
-            <Route
-              path="/dashboard-professor"
-              element={
-                <ProtectedRoute allowedRoles={["PROFESSOR"]}>
-                  <DashboardProfessor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/solicitar-projeto"
-              element={
-                <ProtectedRoute allowedRoles={["PROFESSOR"]}>
-                  <SolicitarProjeto />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/meus-projetos"
-              element={
-                <ProtectedRoute allowedRoles={["PROFESSOR"]}>
-                  <MeusProjetos />
-                </ProtectedRoute>
-              }
-            />
+            {/* Professor Routes - Temporarily without protection */}
+            <Route path="/dashboard-professor" element={<DashboardProfessor />} />
+            <Route path="/solicitar-projeto" element={<SolicitarProjeto />} />
+            <Route path="/meus-projetos" element={<MeusProjetos />} />
             
-            {/* Admin Routes */}
-            <Route
-              path="/dashboard-admin"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <DashboardAdmin />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projetos"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <Projetos />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/cadastro-professor-admin"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <CadastroProfessorAdmin />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/professores"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <Professores />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/grupos"
-              element={
-                <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                  <Grupos />
-                </ProtectedRoute>
-              }
-            />
+            {/* Admin Routes - Temporarily without protection */}
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+            <Route path="/projetos" element={<Projetos />} />
+            <Route path="/cadastro-professor-admin" element={<CadastroProfessorAdmin />} />
+            <Route path="/professores" element={<Professores />} />
+            <Route path="/grupos" element={<Grupos />} />
             
             {/* Catch-all route for 404 */}
             <Route path="*" element={<NotFound />} />
