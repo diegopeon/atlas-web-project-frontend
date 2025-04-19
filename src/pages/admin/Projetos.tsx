@@ -70,10 +70,10 @@ const Projetos: React.FC = () => {
       setProjects(projectsData);
       setFilteredProjects(projectsData);
       
-      // Create a map of professor IDs to names
+      // Create a map of professor IDs to logins (email)
       const professorMap: Record<string, string> = {};
       professorsData.forEach((professor) => {
-        professorMap[professor.id] = professor.nome || professor.login;
+        professorMap[professor.id] = professor.login;
       });
       setProfessors(professorMap);
     } catch (error) {
