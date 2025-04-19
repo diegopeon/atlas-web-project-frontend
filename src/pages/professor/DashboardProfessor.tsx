@@ -19,11 +19,13 @@ import ProjectService from "@/services/project.service";
 import { FilePlus, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const DashboardProfessor: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -37,16 +39,28 @@ const DashboardProfessor: React.FC = () => {
             (project) => project.professorId === user.id
           );
           setProjects(userProjects);
+          
+          // For debugging
+          console.log("Current user ID:", user.id);
+          console.log("All projects:", allProjects);
+          console.log("Filtered projects:", userProjects);
+        } else {
+          console.log("User ID not available");
         }
       } catch (error) {
         console.error("Error fetching projects:", error);
+        toast({
+          title: "Erro ao carregar projetos",
+          description: "Não foi possível obter a lista de projetos.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, [user?.id]);
+  }, [user?.id, toast]);
 
   // Count projects by status
   const statusCounts = projects.reduce((acc, project) => {
@@ -149,10 +163,10 @@ const DashboardProfessor: React.FC = () => {
                     Carregando projetos...
                   </TableCell>
                 </TableRow>
-              ) : recentProjects.length === 0 ? (
+              ) : projects.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center py-4">
-                    Nenhum projeto encontrado.
+                    Nenhum projeto encontrado. Clique em "Solicitar Projeto" para criar seu primeiro projeto.
                   </TableCell>
                 </TableRow>
               ) : (
