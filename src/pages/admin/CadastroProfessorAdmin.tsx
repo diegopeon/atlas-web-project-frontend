@@ -26,9 +26,7 @@ import AuthService from "@/services/auth.service";
 import { AlertCircle, Check } from "lucide-react";
 
 const professorSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
-  login: z.string().min(1, "Login é obrigatório"),
-  escola: z.string().min(1, "Escola é obrigatória"),
+  login: z.string().min(1, "Login é obrigatório").email("Formato de email inválido"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
   confirmPassword: z.string().min(1, "Confirme sua senha"),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -47,9 +45,7 @@ const CadastroProfessorAdmin: React.FC = () => {
   const form = useForm<ProfessorFormData>({
     resolver: zodResolver(professorSchema),
     defaultValues: {
-      nome: "",
       login: "",
-      escola: "",
       password: "",
       confirmPassword: "",
     },
@@ -62,9 +58,7 @@ const CadastroProfessorAdmin: React.FC = () => {
       setSuccess(null);
       
       await AuthService.registerProfessor({
-        nome: data.nome,
         login: data.login,
-        escola: data.escola,
         password: data.password,
         role: "PROFESSOR",
       });
@@ -122,54 +116,21 @@ const CadastroProfessorAdmin: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite o nome completo"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="login"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Login</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Digite o login"
+                        type="email"
+                        placeholder="Digite o email"
                         {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
                     <FormDescription>
-                      O login será usado para acessar o sistema
+                      O email será usado para acessar o sistema
                     </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="escola"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Escola</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite a escola"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

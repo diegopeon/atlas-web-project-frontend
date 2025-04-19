@@ -48,9 +48,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const professorEditSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
-  escola: z.string().min(1, "Escola é obrigatória"),
-  login: z.string().min(1, "Login é obrigatório"),
+  login: z.string().min(1, "Login é obrigatório").email("Formato de email inválido"),
 });
 
 type ProfessorEditFormData = z.infer<typeof professorEditSchema>;
@@ -70,8 +68,6 @@ const Professores: React.FC = () => {
   const form = useForm<ProfessorEditFormData>({
     resolver: zodResolver(professorEditSchema),
     defaultValues: {
-      nome: "",
-      escola: "",
       login: "",
     },
   });
@@ -104,9 +100,7 @@ const Professores: React.FC = () => {
       const lowerSearch = searchTerm.toLowerCase();
       const filtered = professors.filter(
         (professor) =>
-          professor.nome?.toLowerCase().includes(lowerSearch) ||
-          professor.login?.toLowerCase().includes(lowerSearch) ||
-          professor.escola?.toLowerCase().includes(lowerSearch)
+          professor.login?.toLowerCase().includes(lowerSearch)
       );
       setFilteredProfessors(filtered);
     } else {
@@ -148,8 +142,6 @@ const Professores: React.FC = () => {
   const openEditDialog = (professor: User) => {
     setSelectedProfessor(professor);
     form.reset({
-      nome: professor.nome || "",
-      escola: professor.escola || "",
       login: professor.login,
     });
     setEditDialogOpen(true);
@@ -162,8 +154,6 @@ const Professores: React.FC = () => {
       setEditLoading(true);
       
       await UserService.updateProfessor(selectedProfessor.id, {
-        nome: data.nome,
-        escola: data.escola,
         login: data.login,
       });
       
@@ -217,16 +207,14 @@ const Professores: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
                 <TableHead>Login</TableHead>
-                <TableHead>Escola</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-6">
+                  <TableCell colSpan={2} className="text-center py-6">
                     <div className="flex justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                     </div>
@@ -235,7 +223,7 @@ const Professores: React.FC = () => {
                 </TableRow>
               ) : filteredProfessors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-6">
+                  <TableCell colSpan={2} className="text-center py-6">
                     {searchTerm ? "Nenhum professor encontrado com este termo." : "Nenhum professor cadastrado."}
                   </TableCell>
                 </TableRow>
@@ -243,10 +231,8 @@ const Professores: React.FC = () => {
                 filteredProfessors.map((professor) => (
                   <TableRow key={professor.id}>
                     <TableCell className="font-medium">
-                      {professor.nome || "—"}
+                      {professor.login}
                     </TableCell>
-                    <TableCell>{professor.login}</TableCell>
-                    <TableCell>{professor.escola || "—"}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -289,8 +275,8 @@ const Professores: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Confirmar Exclusão</DialogTitle>
             <DialogDescription>
-              Você tem certeza que deseja excluir o professor{" "}
-              <strong>{selectedProfessor?.nome || selectedProfessor?.login}</strong>? Esta ação não pode ser desfeita.
+              Você tem certeza que deseja excluir o professor com login{" "}
+              <strong>{selectedProfessor?.login}</strong>? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -323,23 +309,6 @@ const Professores: React.FC = () => {
             <form onSubmit={form.handleSubmit(handleEditSubmit)} className="space-y-4 py-2">
               <FormField
                 control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite o nome completo"
-                        {...field}
-                        disabled={editLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="login"
                 render={({ field }) => (
                   <FormItem>
@@ -347,23 +316,6 @@ const Professores: React.FC = () => {
                     <FormControl>
                       <Input
                         placeholder="Digite o login"
-                        {...field}
-                        disabled={editLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="escola"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Escola</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite a escola"
                         {...field}
                         disabled={editLoading}
                       />
