@@ -1,8 +1,7 @@
-
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types";
 import AuthService from "@/services/auth.service";
-import { jwtDecode } from "jwt-decode";
+import { tokenUtils } from "@/utils/tokenUtils";
 
 interface AuthContextType {
   user: User | null;
@@ -32,30 +31,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if we have a token in local storage
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        
-        // Check if token is expired
-        const currentTime = Date.now() / 1000;
-        if (decoded.exp < currentTime) {
-          // Token expired
-          localStorage.removeItem("token");
-          setUser(null);
-        } else {
-          // Valid token, set user
-          setUser({
-            id: decoded.sub,
-            login: decoded.login,
-            role: decoded.role,
-          });
-        }
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        localStorage.removeItem("token");
+    // Verifica o token ao iniciar
+    const token = tokenUtils.getToken();
+    if (token && tokenUtils.isTokenValid()) {
+      const decoded = tokenUtils.decodeToken(token);
+      if (decoded) {
+        setUser({
+          id: decoded.sub,
+          login: decoded.login,
+          role: decoded.role,
+        });
       }
+    } else {
+      tokenUtils.removeToken(); // Remove token se inválido
     }
     setLoading(false);
   }, []);
@@ -65,18 +53,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(true);
       const response = await AuthService.login({ login, password });
       
-      // Save token to local storage
-      localStorage.setItem("token", response.token);
+      // Armazena o token
+      tokenUtils.setToken(response.token);
       
-      // Decode token to get user info
-      const decoded = jwtDecode<JwtPayload>(response.token);
-      
-      // Set user state
-      setUser({
-        id: decoded.sub,
-        login: decoded.login,
-        role: decoded.role,
-      });
+      // Decodifica e configura o usuário
+      const decoded = tokenUtils.decodeToken(response.token);
+      if (decoded) {
+        setUser({
+          id: decoded.sub,
+          login: decoded.login,
+          role: decoded.role,
+        });
+      }
       
       return Promise.resolve();
     } catch (error) {
@@ -88,7 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    AuthService.logout();
+    tokenUtils.removeToken();
     setUser(null);
   };
 

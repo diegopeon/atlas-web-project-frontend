@@ -1,25 +1,27 @@
 
 import axios from "axios";
+import { tokenUtils } from "@/utils/tokenUtils";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/atlas",
 });
 
+// Interceptor para adicionar o token em todas as requisições
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = tokenUtils.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Global error handling
+// Interceptor para tratamento de erros globais
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle token expiration or other global errors
+    // Se receber 401, remove o token e redireciona para login
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
+      tokenUtils.removeToken();
       window.location.href = "/login";
     }
     return Promise.reject(error);
