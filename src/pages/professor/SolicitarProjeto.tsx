@@ -89,7 +89,6 @@ const SolicitarProjeto: React.FC = () => {
         escopo: data.escopo,
         "publico-alvo": data.publicoAlvo,
         status: "AGUARDANDO_ANALISE_PRELIMINAR",
-        professor: { id: Number(user.id) }, // Alterado de professorId para professor: { id: number }
       };
 
       await ProjectService.createProject(payload);
